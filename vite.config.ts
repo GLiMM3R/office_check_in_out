@@ -6,6 +6,7 @@ import { defineConfig } from "vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  base: "https://github.com/GLiMM3R/office_check_in_out",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
