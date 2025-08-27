@@ -31,9 +31,12 @@ interface ApiResponse {
 const GOOGLE_APPS_SCRIPT_URL = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL;
 
 // Office location coordinates (replace with your actual office coordinates)
-const OFFICE_LATITUDE = import.meta.env.VITE_OFFICE_LATITUDE;
-const OFFICE_LONGITUDE = import.meta.env.VITE_OFFICE_LONGITUDE;
-const OFFICE_RADIUS_METERS = import.meta.env.VITE_OFFICE_RADIUS_METERS;
+const OFFICE_LATITUDE =
+  Number(import.meta.env.VITE_OFFICE_LATITUDE) || 17.996246;
+const OFFICE_LONGITUDE =
+  Number(import.meta.env.VITE_OFFICE_LONGITUDE) || 102.640157;
+const OFFICE_RADIUS_METERS =
+  Number(import.meta.env.VITE_OFFICE_RADIUS_METERS) || 100;
 
 // Function to calculate distance between two coordinates using Haversine formula
 const calculateDistance = (
@@ -109,6 +112,17 @@ export default function CheckInOutForm() {
           );
           const withinRadius = distance <= OFFICE_RADIUS_METERS;
 
+          console.log("Debug Location Info:", {
+            userLat: latitude,
+            userLng: longitude,
+            officeLat: OFFICE_LATITUDE,
+            officeLng: OFFICE_LONGITUDE,
+            distance: distance,
+            radius: OFFICE_RADIUS_METERS,
+            withinRadius: withinRadius,
+            environment: window.location.hostname,
+          });
+
           setDistanceFromOffice(distance);
           setIsWithinOfficeRadius(withinRadius);
 
@@ -133,8 +147,8 @@ export default function CheckInOutForm() {
         },
         {
           enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 300000, // 5 minutes
+          timeout: 15000, // Increased timeout for GitHub Pages
+          maximumAge: 60000, // Reduced cache time for more accurate location
         }
       );
     } else {
@@ -421,6 +435,24 @@ export default function CheckInOutForm() {
                         )}m ຈາກຫ້ອງການ)`}
                   </span>
                 </div>
+              </div>
+            )}
+
+            {/* Debug Info - Remove this in production */}
+            {process.env.NODE_ENV === "development" && (
+              <div className="mt-2 p-2 bg-gray-100 rounded-lg text-xs">
+                <div>
+                  Office: {OFFICE_LATITUDE}, {OFFICE_LONGITUDE}
+                </div>
+                <div>
+                  User: {formData.latitude?.toFixed(6)},{" "}
+                  {formData.longitude?.toFixed(6)}
+                </div>
+                <div>
+                  Distance: {distanceFromOffice?.toFixed(2)}m /{" "}
+                  {OFFICE_RADIUS_METERS}m
+                </div>
+                <div>Environment: {window.location.hostname}</div>
               </div>
             )}
           </div>
