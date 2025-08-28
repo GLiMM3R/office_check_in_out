@@ -78,6 +78,19 @@ export default function CheckInOutForm() {
   );
   const [isWithinOfficeRadius, setIsWithinOfficeRadius] =
     useState<boolean>(false);
+  const [rememberName, setRememberName] = useState<boolean>(false);
+
+  // Load saved name from localStorage on component mount
+  useEffect(() => {
+    const savedName = localStorage.getItem("office_check_in_employee_name");
+    const isRemembered =
+      localStorage.getItem("office_check_in_remember_name") === "true";
+
+    if (savedName && isRemembered) {
+      setFormData((prev) => ({ ...prev, employeeName: savedName }));
+      setRememberName(true);
+    }
+  }, []);
 
   // Update current time every second
   useEffect(() => {
@@ -191,6 +204,29 @@ export default function CheckInOutForm() {
       ...prev,
       [name]: value,
     }));
+
+    // Save name to localStorage if remember is checked
+    if (name === "employeeName" && rememberName) {
+      localStorage.setItem("office_check_in_employee_name", value);
+    }
+  };
+
+  const handleRememberNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setRememberName(checked);
+
+    localStorage.setItem("office_check_in_remember_name", checked.toString());
+
+    if (checked && formData.employeeName) {
+      // Save current name if remember is now checked
+      localStorage.setItem(
+        "office_check_in_employee_name",
+        formData.employeeName
+      );
+    } else if (!checked) {
+      // Clear saved name if remember is unchecked
+      localStorage.removeItem("office_check_in_employee_name");
+    }
   };
 
   const handleCheckIn = async (e: React.FormEvent) => {
@@ -382,7 +418,7 @@ export default function CheckInOutForm() {
               className="block text-sm font-medium text-gray-700 mb-2"
             >
               <User className="inline w-4 h-4 mr-2" />
-              ຊື່ເຕັມ
+              ຊື່
             </label>
             <input
               type="text"
@@ -394,6 +430,23 @@ export default function CheckInOutForm() {
               placeholder="ໃສ່ຊື່ເຕັມຂອງທ່ານ"
               required
             />
+
+            {/* Remember Name Checkbox */}
+            <div className="flex items-center mt-2">
+              <input
+                type="checkbox"
+                id="rememberName"
+                checked={rememberName}
+                onChange={handleRememberNameChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="rememberName"
+                className="ml-2 text-sm text-gray-600"
+              >
+                Remember me
+              </label>
+            </div>
           </div>
 
           {/* Location Display */}
